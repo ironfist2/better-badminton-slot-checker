@@ -58,12 +58,14 @@ def process_availability(location_name, availability):
     weekno = myDate.weekday()
 
     for time in times:
-        # log.info([weekno, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
-        if weekno < 5 and time["starts_at"]["format_24_hour"] >= "18:00" and time["spaces"] > 0:
-            data.append([location_name, date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
-        elif weekno >= 5 and time["starts_at"]["format_24_hour"] >= "10:00" and time["spaces"] > 0:
-            data.append([location_name, date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
-        
+        try:
+            # log.info([weekno, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
+            if weekno < 5 and time["starts_at"]["format_24_hour"] >= "18:00" and time["spaces"] > 0:
+                data.append([location_name, date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
+            elif weekno >= 5 and time["starts_at"]["format_24_hour"] >= "10:00" and time["spaces"] > 0:
+                data.append([location_name, date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
+        except Exception as e:
+            continue
     return data
 
 def pretty_print(slots):
