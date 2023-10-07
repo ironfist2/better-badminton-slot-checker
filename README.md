@@ -1,5 +1,3 @@
-# Python Starter
+# better-badminton-slot-checker
 
-Quickly get started with [Python](https://www.python.org/) using this starter! 
-
-- If you want to upgrade Python, you can change the image in the [Dockerfile](./.codesandbox/Dockerfile).
+Docker Container application for checking badminton slots in London Better courts
