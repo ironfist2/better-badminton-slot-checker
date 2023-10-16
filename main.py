@@ -24,9 +24,9 @@ locations = [
     'mile-end-park-leisure-centre',
     'kings-hall-leisure-centre',
     'poplar-baths-leisure-centre',
-    # 'copper-box-arena',
+    'copper-box-arena',
     # 'walthamstow-leisure-centre',
-    # 'leytonstone-leisure-centre',
+    'leytonstone-leisure-centre',
 ]
 
 def main():
@@ -58,7 +58,8 @@ def read_csv():
 @app.route('/')
 def hello():
     data = read_csv()
-    last_refreshed_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    modification_time = os.path.getmtime('data.csv')
+    last_refreshed_time = time.ctime(modification_time)
     return render_template('index.html', data=data, last_refreshed_time=last_refreshed_time)
 
 @app.route('/refresh', methods=['GET'])
