@@ -4,6 +4,7 @@ import os
 import datetime
 from flask import Flask, render_template, jsonify
 import csv
+from multiprocessing.pool import ThreadPool as Pool
 
 app = Flask(__name__)
 app.config['TIMEOUT'] = 600
@@ -23,20 +24,27 @@ locations = [
     'mile-end-park-leisure-centre',
     'kings-hall-leisure-centre',
     'poplar-baths-leisure-centre',
-    'copper-box-arena',
+    # 'copper-box-arena',
     # 'walthamstow-leisure-centre',
-    'leytonstone-leisure-centre',
+    # 'leytonstone-leisure-centre',
 ]
 
 def main():
     log.info("Hello")
     # locations = utils.get_locations(url)
     slots = []
+    pool_size = 8  # your "parallelness"
+    pool = Pool(pool_size)
+    availabilities = []
     for location in locations:
-        availabilities = utils.get_availabilities(location)
-        for availability in availabilities:
-            processed_availability = utils.process_availability(location, availability)
-            slots = slots + processed_availability
+        availabilities.append(pool.apply_async(utils.get_availabilities, (location,)))
+
+    for i in availabilities:
+        i = i.get()
+        for j in i:
+            for k in j:
+                processed_availability = utils.process_availability(k)
+                slots = slots + processed_availability
     utils.pretty_print(slots)
 
 def read_csv():
@@ -57,7 +65,6 @@ def hello():
 def refresh():
     main()
     data = read_csv()
-    last_refreshed_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return jsonify(data)
 
 if __name__ == '__main__':
