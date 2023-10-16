@@ -69,3 +69,6 @@ def refresh():
 
 if __name__ == '__main__':
     app.run()
+
+def start_app():
+    app.run()
