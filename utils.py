@@ -72,3 +72,4 @@ def pretty_print(slots):
     headers = ["Location", "Date", "Start Time", "End Time"]
     df = pd.DataFrame(data=slots, columns=headers)
     print(df)
+    df.to_csv('data.csv')

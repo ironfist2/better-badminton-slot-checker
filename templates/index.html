@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Web App</title>
+    <style>
+        #loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Availability</h1>
+    <p>Last Refreshed: {{ last_refreshed_time }}</p>
+    <button id="refresh-button">Refresh</button>
+    <div id="loading">Loading...</div>
+    <table border="1" id="data-table">
+        <tr>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row['Location'] }}</td>
+            <td>{{ row['Date'] }}</td>
+            <td>{{ row['Start Time'] }}</td>
+            <td>{{ row['End Time'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <script>
+        const refreshButton = document.getElementById('refresh-button');
+        const dataTable = document.getElementById('data-table');
+        const loadingIndicator = document.getElementById('loading');
+        let isLoading = false;
+
+        refreshButton.addEventListener('click', () => {
+            if (isLoading) {
+                return;  // Prevent multiple clicks while loading
+            }
+             // Set loading state
+            isLoading = true;
+            // Show the loading indicator
+            loadingIndicator.style.display = 'block';
+
+            fetch('/refresh?_=${new Date().getTime()}')
+                .then(response => response.json())
+                .then(data => {
+                    // Clear existing rows in the table
+                    while (dataTable.rows.length > 1) {
+                        dataTable.deleteRow(1);
+                    }
+
+                    // Populate the table with new data
+                    data.forEach(row => {
+                        const newRow = dataTable.insertRow(-1);
+                        const locaionCell = newRow.insertCell(0);
+                        const dateCell = newRow.insertCell(1);
+                        const startCell = newRow.insertCell(2);
+                        const endCell = newRow.insertCell(3);
+                        locaionCell.innerText = row['Location'];
+                        dateCell.innerText = row['Date'];
+                        startCell.innerText = row['Start Time'];
+                        endCell.innerText = row['End Time'];
+                    });
+
+                    // Hide the loading indicator
+                    loadingIndicator.style.display = 'none';
+                    isLoading = false; // Reset loading state
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Ensure the loading indicator is hidden in case of an error
+                    loadingIndicator.style.display = 'none';
+                });
+        });
+    </script>
+</body>
+</html>
