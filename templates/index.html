@@ -44,30 +44,11 @@
             // Show the loading indicator
             loadingIndicator.style.display = 'block';
 
-            fetch('/refresh?_=${new Date().getTime()}')
+            fetch('/refresh')
                 .then(response => response.json())
                 .then(data => {
-                    // Clear existing rows in the table
-                    while (dataTable.rows.length > 1) {
-                        dataTable.deleteRow(1);
-                    }
-
-                    // Populate the table with new data
-                    data.forEach(row => {
-                        const newRow = dataTable.insertRow(-1);
-                        const locaionCell = newRow.insertCell(0);
-                        const dateCell = newRow.insertCell(1);
-                        const startCell = newRow.insertCell(2);
-                        const endCell = newRow.insertCell(3);
-                        locaionCell.innerText = row['Location'];
-                        dateCell.innerText = row['Date'];
-                        startCell.innerText = row['Start Time'];
-                        endCell.innerText = row['End Time'];
-                    });
-
-                    // Hide the loading indicator
+                    alert(data.message)
                     loadingIndicator.style.display = 'none';
-                    isLoading = false; // Reset loading state
                 })
                 .catch(error => {
                     console.error('Error:', error);

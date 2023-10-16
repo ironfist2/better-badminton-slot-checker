@@ -4,7 +4,11 @@ import os
 import datetime
 from flask import Flask, render_template, jsonify
 import csv
-from multiprocessing.pool import ThreadPool as Pool
+import threading
+import time
+
+
+thread_event = threading.Event()
 
 app = Flask(__name__)
 app.config['TIMEOUT'] = 600
@@ -14,7 +18,7 @@ log = logging.getLogger(__name__)
 
 url = 'https://www.better.org.uk/book-activity'
 locations = [
-    # 'finsbury-leisure-centre',
+    'finsbury-leisure-centre',
     'britannia-leisure-centre',
     'john-orwell',
     'talacre-community-sports-centre',
@@ -24,27 +28,20 @@ locations = [
     'mile-end-park-leisure-centre',
     'kings-hall-leisure-centre',
     'poplar-baths-leisure-centre',
-    # 'copper-box-arena',
+    'copper-box-arena',
     # 'walthamstow-leisure-centre',
-    # 'leytonstone-leisure-centre',
+    'leytonstone-leisure-centre',
 ]
 
 def main():
     log.info("Hello")
     # locations = utils.get_locations(url)
     slots = []
-    pool_size = 8  # your "parallelness"
-    pool = Pool(pool_size)
-    availabilities = []
     for location in locations:
-        availabilities.append(pool.apply_async(utils.get_availabilities, (location,)))
-
-    for i in availabilities:
-        i = i.get()
-        for j in i:
-            for k in j:
-                processed_availability = utils.process_availability(k)
-                slots = slots + processed_availability
+        availabilities = utils.get_availabilities(location)
+        for availability in availabilities:
+            processed_availability = utils.process_availability(location, availability)
+            slots = slots + processed_availability
     utils.pretty_print(slots)
 
 def read_csv():
@@ -58,14 +55,19 @@ def read_csv():
 @app.route('/')
 def hello():
     data = read_csv()
-    last_refreshed_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    modification_time = os.path.getmtime('data.csv')
+    last_refreshed_time = time.ctime(modification_time)
     return render_template('index.html', data=data, last_refreshed_time=last_refreshed_time)
 
 @app.route('/refresh', methods=['GET'])
 def refresh():
-    main()
-    data = read_csv()
-    return jsonify(data)
+    try:
+        thread_event.set()
+        thread = threading.Thread(target=main)
+        thread.start()
+        return {"message": "Fetching Latest slots in Background. Please check after few minutes"}
+    except Exception as error:
+        return {"error": error}
 
 if __name__ == '__main__':
     app.run()

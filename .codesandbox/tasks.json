@@ -17,8 +17,7 @@
         "port": 5000
       },
       "restartOn": {
-        "files": [
-        ],
+        "files": [],
         "branch": false,
         "resume": false
       }
