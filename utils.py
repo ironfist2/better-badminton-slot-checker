@@ -75,9 +75,9 @@ def process_availability(availability):
         try:
             if weekno < 5 and time["starts_at"]["format_24_hour"] >= "18:00" and time["spaces"] > 0:
                 # log.info(time["spaces"])
-                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time["venue_slug"]}/{time["category_slug"]}/{date}/by-time"])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
             elif weekno >= 5 and time["starts_at"]["format_24_hour"] >= "10:00" and time["spaces"] > 0:
-                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time["venue_slug"]}/{time["category_slug"]}/{date}/by-time"])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
         except Exception as e:
             log.error(e)
             continue
