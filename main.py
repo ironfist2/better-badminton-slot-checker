@@ -67,7 +67,9 @@ def hello():
 def refresh():
     main()
     data = read_csv()
-    return jsonify(data)
+    modification_time = os.path.getmtime('data.csv')
+    last_refreshed_time = time.ctime(modification_time)
+    return jsonify({'data': data, 'last_refreshed_time': last_refreshed_time})
 
 if __name__ == '__main__':
     from waitress import serve

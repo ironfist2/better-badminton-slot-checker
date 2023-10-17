@@ -10,22 +10,26 @@
 </head>
 <body>
     <h1>Availability</h1>
-    <p>Last Refreshed: {{ last_refreshed_time }}</p>
+    <p id="last_refreshed_time">Last Refreshed: {{ last_refreshed_time }}</p>
     <button id="refresh-button">Refresh</button>
     <div id="loading">Loading...</div>
     <table border="1" id="data-table">
         <tr>
             <th>Location</th>
             <th>Date</th>
+            <th>Day</th>
             <th>Start Time</th>
             <th>End Time</th>
+            <th>Link</th>
         </tr>
         {% for row in data %}
         <tr>
             <td>{{ row['Location'] }}</td>
             <td>{{ row['Date'] }}</td>
+            <td>{{ row['Day'] }}</td>
             <td>{{ row['Start Time'] }}</td>
             <td>{{ row['End Time'] }}</td>
+            <td><a href={{ row['Link'] }}>Book</a></td>
         </tr>
         {% endfor %}
     </table>
@@ -33,6 +37,7 @@
         const refreshButton = document.getElementById('refresh-button');
         const dataTable = document.getElementById('data-table');
         const loadingIndicator = document.getElementById('loading');
+        const last_refreshed_time_p = document.getElementById('last_refreshed_time');
         let isLoading = false;
 
         refreshButton.addEventListener('click', () => {
@@ -46,23 +51,34 @@
 
             fetch('/refresh?_=${new Date().getTime()}')
                 .then(response => response.json())
-                .then(data => {
+                .then(response => {
                     // Clear existing rows in the table
                     while (dataTable.rows.length > 1) {
                         dataTable.deleteRow(1);
                     }
 
+                    data = response['data']
+                    last_refreshed_time = response['last_refreshed_time']
+                    last_refreshed_time_p.innerText = last_refreshed_time;
+
                     // Populate the table with new data
                     data.forEach(row => {
                         const newRow = dataTable.insertRow(-1);
-                        const locaionCell = newRow.insertCell(0);
+                        const locationCell = newRow.insertCell(0);
                         const dateCell = newRow.insertCell(1);
-                        const startCell = newRow.insertCell(2);
-                        const endCell = newRow.insertCell(3);
-                        locaionCell.innerText = row['Location'];
+                        const dayCell = newRow.insertCell(2);
+                        const startCell = newRow.insertCell(3);
+                        const endCell = newRow.insertCell(4);
+                        const linkCell = newRow.insertCell(5);
+                        locationCell.innerText = row['Location'];
                         dateCell.innerText = row['Date'];
+                        dayCell.innerText = row['Day'];
                         startCell.innerText = row['Start Time'];
                         endCell.innerText = row['End Time'];
+                        const linkElement = document.createElement('a');
+                        linkElement.href = row['Link']; // Set the href attribute
+                        linkElement.textContent = 'Book'; // Set the link text
+                        linkCell.appendChild(linkElement);
                     });
 
                     // Hide the loading indicator

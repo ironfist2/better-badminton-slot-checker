@@ -33,13 +33,17 @@ def get_locations(url):
         location_name = parsed_link.path.strip().split('/')[-1]
         yield location_name
 
+
 def worker(location_name, date):
     results = []
     for dur in [60, 40]:
         try:
-            log.debug(f"Fetching availabilities for {location_name} on {date} for duration {dur} mins")
-            url = f'https://better-admin.org.uk/api/activities/venue/{location_name}/activity/badminton-{dur}min/times?date={date}'
-            response = requests.request("GET", url, headers={'Origin': 'https://bookings.better.org.uk'})
+            log.debug(f"Fetching availabilities for {
+                      location_name} on {date} for duration {dur} mins")
+            url = f'https://better-admin.org.uk/api/activities/venue/{
+                location_name}/activity/badminton-{dur}min/times?date={date}'
+            response = requests.request(
+                "GET", url, headers={'Origin': 'https://bookings.better.org.uk'})
             data = json.loads(response.text)
             if not "data" in data:
                 continue
@@ -52,6 +56,8 @@ def worker(location_name, date):
             log.error(exc)
             continue
     return results
+
+
 def get_availabilities(location_name):
     pool_size = 8  # your "parallelness"
     pool = Pool(pool_size)
@@ -61,25 +67,30 @@ def get_availabilities(location_name):
 
     return [p.get() for p in results]
 
+
 def process_availability(availability):
     date, times = availability
     data = []
     myDate = datetime.strptime(date, DATE_FORMAT)
     weekno = myDate.weekday()
+    day = myDate.strftime('%A')
     for time in times:
         try:
-            # log.info([weekno, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
             if weekno < 5 and time["starts_at"]["format_24_hour"] >= "18:00" and time["spaces"] > 0:
-                data.append([time["venue_slug"], date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
+                # log.info(time["spaces"])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"],
+                            f"https://bookings.better.org.uk/location/{time["venue_slug"]}/{time["category_slug"]}/{date}/by-time"])
             elif weekno >= 5 and time["starts_at"]["format_24_hour"] >= "10:00" and time["spaces"] > 0:
-                data.append([time["venue_slug"], date, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"]])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"],
+                            f"https://bookings.better.org.uk/location/{time["venue_slug"]}/{time["category_slug"]}/{date}/by-time"])
         except Exception as e:
             log.error(e)
             continue
     return data
 
+
 def pretty_print(slots):
-    headers = ["Location", "Date", "Start Time", "End Time"]
+    headers = ["Location", "Date", "Day", "Start Time", "End Time", "Link"]
     df = pd.DataFrame(data=slots, columns=headers)
     print(df)
     df.to_csv('data.csv')
