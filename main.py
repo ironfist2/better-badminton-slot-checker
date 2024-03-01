@@ -18,17 +18,18 @@ locations = [
     # 'finsbury-leisure-centre',
     'britannia-leisure-centre',
     'john-orwell',
-    'talacre-community-sports-centre',
+    # 'talacre-community-sports-centre',
     'whitechapel-sports-centre',
     'queensbridge-sports-community-centre',
-    'clissold-leisure-centre',
+    # 'clissold-leisure-centre',
     'mile-end-park-leisure-centre',
-    'kings-hall-leisure-centre',
+    # 'kings-hall-leisure-centre',
     'poplar-baths-leisure-centre',
     'copper-box-arena',
     # 'walthamstow-leisure-centre',
-    'leytonstone-leisure-centre',
+    # 'leytonstone-leisure-centre',
 ]
+
 
 def main():
     log.info("Hello")
@@ -38,7 +39,8 @@ def main():
     pool = Pool(pool_size)
     availabilities = []
     for location in locations:
-        availabilities.append(pool.apply_async(utils.get_availabilities, (location,)))
+        availabilities.append(pool.apply_async(
+            utils.get_availabilities, (location,)))
 
     for i in availabilities:
         i = i.get()
@@ -48,6 +50,7 @@ def main():
                 slots = slots + processed_availability
     utils.pretty_print(slots)
 
+
 def read_csv():
     data = []
     with open('data.csv', 'r') as csv_file:
@@ -56,12 +59,14 @@ def read_csv():
             data.append(row)
     return data
 
+
 @app.route('/')
 def hello():
     data = read_csv()
     modification_time = os.path.getmtime('data.csv')
     last_refreshed_time = time.ctime(modification_time)
     return render_template('index.html', data=data, last_refreshed_time=last_refreshed_time)
+
 
 @app.route('/refresh', methods=['GET'])
 def refresh():
@@ -70,6 +75,7 @@ def refresh():
     modification_time = os.path.getmtime('data.csv')
     last_refreshed_time = time.ctime(modification_time)
     return jsonify({'data': data, 'last_refreshed_time': last_refreshed_time})
+
 
 if __name__ == '__main__':
     from waitress import serve

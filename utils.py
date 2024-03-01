@@ -9,6 +9,7 @@ from multiprocessing.pool import ThreadPool as Pool
 
 log = logging.getLogger(__name__)
 DATE_FORMAT = '%Y-%m-%d'
+UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
 
 
 def get_dates_from_today():
@@ -38,9 +39,11 @@ def worker(location_name, date):
     results = []
     for dur in [60, 40]:
         try:
-            log.debug(f"Fetching availabilities for {location_name} on {date} for duration {dur} mins")
+            log.debug(
+                f"Fetching availabilities for {location_name} on {date} for duration {dur} mins")
             url = f'https://better-admin.org.uk/api/activities/venue/{location_name}/activity/badminton-{dur}min/times?date={date}'
-            response = requests.request("GET", url, headers={'Origin': 'https://bookings.better.org.uk'})
+            response = requests.request(
+                "GET", url, headers={'Origin': 'https://bookings.better.org.uk', 'User-Agent': UserAgent})
             data = json.loads(response.text)
             if not "data" in data:
                 continue
@@ -75,9 +78,11 @@ def process_availability(availability):
         try:
             if weekno < 5 and time["starts_at"]["format_24_hour"] >= "18:00" and time["spaces"] > 0:
                 # log.info(time["spaces"])
-                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"],
+                            f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
             elif weekno >= 5 and time["starts_at"]["format_24_hour"] >= "10:00" and time["spaces"] > 0:
-                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"], f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
+                data.append([time["venue_slug"], date, day, time["starts_at"]["format_24_hour"], time["ends_at"]["format_24_hour"],
+                            f"https://bookings.better.org.uk/location/{time['venue_slug']}/{time['category_slug']}/{date}/by-time"])
         except Exception as e:
             log.error(e)
             continue
